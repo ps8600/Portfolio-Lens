@@ -20,193 +20,11 @@ header {visibility: hidden;}
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Custom CSS for responsive design and finance-appropriate styling
+# Minimal inline CSS
 st.markdown("""
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-    /* Reset and base styles */
-    * {
-        box-sizing: border-box;
-    }
-    
-    html, body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-    
-    /* Color scheme - professional finance with neon green accents */
-    :root {
-        --primary-neon: #00FF00;
-        --primary-neon-dark: #00CC00;
-        --dark-bg: #0a0e27;
-        --dark-surface: #1a1f3a;
-        --light-bg: #ffffff;
-        --light-surface: #f5f7fa;
-        --text-dark: #1a1a1a;
-        --text-light: #e8e8e8;
-        --accent-positive: #00FF00;
-        --accent-neutral: #4a5568;
-    }
-    
-    /* Light mode */
-    [data-theme="light"] {
-        --bg-primary: var(--light-bg);
-        --bg-secondary: var(--light-surface);
-        --text-primary: var(--text-dark);
-        --border-color: #e0e0e0;
-        --accent-color: #00CC00;
-    }
-    
-    /* Dark mode */
-    [data-theme="dark"] {
-        --bg-primary: var(--dark-bg);
-        --bg-secondary: var(--dark-surface);
-        --text-primary: var(--text-light);
-        --border-color: #2a2a3e;
-        --accent-color: var(--primary-neon);
-    }
-    
-    /* Main title styling */
-    h1 {
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
-        font-weight: 700;
-        color: var(--accent-color);
-        letter-spacing: -0.5px;
-    }
-    
-    /* Section headers */
-    h2 {
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-        color: var(--text-primary);
-    }
-    
-    /* Dropdown container */
-    .dropdown-container {
-        background-color: var(--bg-secondary);
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        margin-bottom: 1rem;
-    }
-    
-    /* Slider container */
-    .slider-container {
-        background-color: var(--bg-secondary);
-        padding: 0.75rem;
-        border-radius: 6px;
-        margin-top: 0.5rem;
-        border: 1px solid var(--border-color);
-    }
-    
-    /* Performance chart container - transparent background */
-    .performance-container {
-        padding: 1.5rem;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-    }
-    
-    /* Slider styling override */
     input[type="range"] {
-        accent-color: var(--accent-color);
-    }
-    
-    /* Input and button styles */
-    input[type="range"],
-    input[type="text"],
-    input[type="number"],
-    select {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        font-size: 0.95rem;
-        color: var(--text-primary);
-        background-color: var(--bg-primary);
-        border-color: var(--border-color);
-    }
-    
-    button {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        background-color: var(--bg-secondary);
-        color: var(--text-primary);
-        border-color: var(--border-color);
-    }
-    
-    /* Text styling */
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        color: var(--text-primary);
-        background-color: var(--bg-primary);
-    }
-    
-    /* Responsive design */
-    @media (max-width: 1024px) {
-        h1 {
-            font-size: 1.7rem;
-            margin-bottom: 1rem;
-        }
-        
-        h2 {
-            font-size: 1.1rem;
-            margin-top: 1rem;
-            margin-bottom: 0.75rem;
-        }
-        
-        .dropdown-container,
-        .slider-container,
-        .performance-container {
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        h1 {
-            font-size: 1.4rem;
-        }
-        
-        h2 {
-            font-size: 1rem;
-        }
-        
-        .dropdown-container,
-        .slider-container,
-        .performance-container {
-            padding: 0.5rem;
-        }
-    }
-    
-    /* Label styling */
-    .input-label {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-        display: block;
-        color: var(--text-primary);
-        font-size: 0.95rem;
-    }
-    
-    .value-display {
-        text-align: right;
-        font-weight: 600;
-        color: var(--accent-color);
-        min-width: 50px;
-        font-size: 0.9rem;
-    }
-    
-    .info-text {
-        font-size: 0.8rem;
-        color: var(--accent-neutral);
-        margin-top: 0.25rem;
-        line-height: 1.3;
-    }
-    
-    .reference-indicator {
-        font-size: 0.75rem;
-        color: #888888;
-        margin-top: 0.1rem;
+        accent-color: #00FF00;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -393,7 +211,7 @@ if "eq_bond_value" not in st.session_state:
     st.session_state.eq_bond_value = 0.50
 
 if "home_bias_value" not in st.session_state:
-    st.session_state.home_bias_value = 0.33
+    st.session_state.home_bias_value = 1/3
 
 if "yield_curve_value" not in st.session_state:
     st.session_state.yield_curve_value = 0.75
@@ -404,115 +222,98 @@ if "fx_hedge_value" not in st.session_state:
 # Main title
 st.title("Portfolio Architecture")
 
-# Define input descriptions and reference values
-input_config = {
-    "Equities/Bonds Ratio": {
-        "description": "Allocate between equities and bonds. Swiss pension funds typically allocate 50% to equities and 50% to bonds (excluding real estate).",
-        "reference": 0.50,
-        "reference_display": "50%"
-    },
-    "Home Bias Equities": {
-        "description": "Allocate between Swiss and global equities. Swiss pension funds typically allocate 1/3 to Swiss stocks and 2/3 to global stocks.",
-        "reference": 1/3,
-        "reference_display": "33%"
-    },
-    "Yield Curve CHF": {
-        "description": "Allocate between CHF-denominated and foreign bonds. Swiss pension funds typically allocate 75% to CHF bonds and 25% to foreign bonds.",
-        "reference": 0.75,
-        "reference_display": "75%"
-    },
-    "FX Hedging": {
-        "description": "Control FX hedging of foreign currency exposure. Swiss pension funds typically hedge approximately 80% of their foreign currency exposure.",
-        "reference": 0.80,
-        "reference_display": "80%"
-    }
-}
-
 # Strategic Exposure section
 st.markdown("## Strategic Exposure")
 
-with st.container():
-    st.markdown('<div class="dropdown-container">', unsafe_allow_html=True)
+# Compact slider layout
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Equities/Bonds Ratio**")
+    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
+    with col_min:
+        st.write("0%")
+    with col_slider:
+        st.session_state.eq_bond_value = st.slider(
+            "Equities/Bonds Ratio",
+            0.0,
+            1.0,
+            st.session_state.eq_bond_value,
+            0.01,
+            label_visibility="collapsed",
+            format="%.0f%%"
+        )
+    with col_val:
+        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.eq_bond_value*100:.0f}%</div>", unsafe_allow_html=True)
+    with col_max:
+        st.write("100%")
+    st.caption("½ = 50%")
     
-    # Use expanders for responsive design
-    col1, col2 = st.columns(2)
+    st.markdown("**Yield Curve CHF**")
+    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
+    with col_min:
+        st.write("0%")
+    with col_slider:
+        st.session_state.yield_curve_value = st.slider(
+            "Yield Curve CHF",
+            0.0,
+            1.0,
+            st.session_state.yield_curve_value,
+            0.01,
+            label_visibility="collapsed",
+            format="%.0f%%"
+        )
+    with col_val:
+        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.yield_curve_value*100:.0f}%</div>", unsafe_allow_html=True)
+    with col_max:
+        st.write("100%")
+    st.caption("¾ = 75%")
+
+with col2:
+    st.markdown("**Home Bias Equities**")
+    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
+    with col_min:
+        st.write("0%")
+    with col_slider:
+        st.session_state.home_bias_value = st.slider(
+            "Home Bias Equities",
+            0.0,
+            1.0,
+            st.session_state.home_bias_value,
+            0.01,
+            label_visibility="collapsed",
+            format="%.0f%%"
+        )
+    with col_val:
+        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.home_bias_value*100:.0f}%</div>", unsafe_allow_html=True)
+    with col_max:
+        st.write("100%")
+    st.caption("⅓ = 33%")
     
-    with col1:
-        with st.expander("⚖️ Equities/Bonds Ratio", expanded=True):
-            st.markdown('<span class="input-label">Equities/Bonds Ratio</span>', unsafe_allow_html=True)
-            st.markdown(f'<div class="info-text">{input_config["Equities/Bonds Ratio"]["description"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="reference-indicator">Reference: {input_config["Equities/Bonds Ratio"]["reference_display"]}</div>', unsafe_allow_html=True)
-            
-            st.session_state.eq_bond_value = st.slider(
-                "Equities/Bonds Ratio",
-                0.0,
-                1.0,
-                st.session_state.eq_bond_value,
-                0.01,
-                label_visibility="collapsed"
-            )
-            col_val, col_pct = st.columns([1, 0.5])
-            with col_pct:
-                st.markdown(f'<div class="value-display">{st.session_state.eq_bond_value*100:.0f}%</div>', unsafe_allow_html=True)
-        
-        with st.expander("📈 Yield Curve CHF"):
-            st.markdown('<span class="input-label">Yield Curve CHF</span>', unsafe_allow_html=True)
-            st.markdown(f'<div class="info-text">{input_config["Yield Curve CHF"]["description"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="reference-indicator">Reference: {input_config["Yield Curve CHF"]["reference_display"]}</div>', unsafe_allow_html=True)
-            
-            st.session_state.yield_curve_value = st.slider(
-                "Yield Curve CHF",
-                0.0,
-                1.0,
-                st.session_state.yield_curve_value,
-                0.01,
-                label_visibility="collapsed"
-            )
-            col_val, col_pct = st.columns([1, 0.5])
-            with col_pct:
-                st.markdown(f'<div class="value-display">{st.session_state.yield_curve_value*100:.0f}%</div>', unsafe_allow_html=True)
-    
-    with col2:
-        with st.expander("🏠 Home Bias Equities"):
-            st.markdown('<span class="input-label">Home Bias Equities</span>', unsafe_allow_html=True)
-            st.markdown(f'<div class="info-text">{input_config["Home Bias Equities"]["description"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="reference-indicator">Reference: {input_config["Home Bias Equities"]["reference_display"]}</div>', unsafe_allow_html=True)
-            
-            st.session_state.home_bias_value = st.slider(
-                "Home Bias Equities",
-                0.0,
-                1.0,
-                st.session_state.home_bias_value,
-                0.01,
-                label_visibility="collapsed"
-            )
-            col_val, col_pct = st.columns([1, 0.5])
-            with col_pct:
-                st.markdown(f'<div class="value-display">{st.session_state.home_bias_value*100:.0f}%</div>', unsafe_allow_html=True)
-        
-        with st.expander("🛡️ FX Hedging"):
-            st.markdown('<span class="input-label">FX Hedging</span>', unsafe_allow_html=True)
-            st.markdown(f'<div class="info-text">{input_config["FX Hedging"]["description"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="reference-indicator">Reference: {input_config["FX Hedging"]["reference_display"]}</div>', unsafe_allow_html=True)
-            
-            st.session_state.fx_hedge_value = st.slider(
-                "FX Hedging",
-                0.0,
-                1.0,
-                st.session_state.fx_hedge_value,
-                0.01,
-                label_visibility="collapsed"
-            )
-            col_val, col_pct = st.columns([1, 0.5])
-            with col_pct:
-                st.markdown(f'<div class="value-display">{st.session_state.fx_hedge_value*100:.0f}%</div>', unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("**FX Hedging**")
+    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
+    with col_min:
+        st.write("0%")
+    with col_slider:
+        st.session_state.fx_hedge_value = st.slider(
+            "FX Hedging",
+            0.0,
+            1.0,
+            st.session_state.fx_hedge_value,
+            0.01,
+            label_visibility="collapsed",
+            format="%.0f%%"
+        )
+    with col_val:
+        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.fx_hedge_value*100:.0f}%</div>", unsafe_allow_html=True)
+    with col_max:
+        st.write("100%")
+    st.caption("⅘ = 80%")
 
 # Reset to reference button
 col_button1, col_button2, col_button3 = st.columns([1, 4, 1])
 with col_button1:
-    if st.button("📍 Reset to Reference", use_container_width=True):
+    if st.button("📍 Reset", use_container_width=True):
         st.session_state.eq_bond_value = 0.50
         st.session_state.home_bias_value = 1/3
         st.session_state.yield_curve_value = 0.75
@@ -529,91 +330,77 @@ user_weights = calculate_user_weights(
 # Performance section
 st.markdown("## Performance")
 
-with st.container():
-    st.markdown('<div class="performance-container">', unsafe_allow_html=True)
-    
-    reference_returns = calculate_portfolio_returns(
-        df,
-        reference_weights,
-        asset_cols
-    )
+reference_returns = calculate_portfolio_returns(
+    df,
+    reference_weights,
+    asset_cols
+)
 
-    user_returns = calculate_portfolio_returns(
-        df,
-        user_weights,
-        asset_cols
-    )
+user_returns = calculate_portfolio_returns(
+    df,
+    user_weights,
+    asset_cols
+)
 
-    fig = go.Figure()
+fig = go.Figure()
 
-    fig.add_trace(
-        go.Scatter(
-            x=df["Date"],
-            y=reference_returns,
-            mode="lines",
-            name="Reference Portfolio",
-            line=dict(color="#808080", width=2, dash="dash")
-        )
+fig.add_trace(
+    go.Scatter(
+        x=df["Date"],
+        y=reference_returns,
+        mode="lines",
+        name="Reference",
+        line=dict(color="#808080", width=2, dash="dash"),
+        hovertemplate="<b>Reference</b><br>Date: %{x|%Y-%m-%d}<br>Return: %{y:.2f}%<extra></extra>"
     )
+)
 
-    fig.add_trace(
-        go.Scatter(
-            x=df["Date"],
-            y=user_returns,
-            mode="lines",
-            name="User Portfolio",
-            line=dict(color="#00FF00", width=3)
-        )
+fig.add_trace(
+    go.Scatter(
+        x=df["Date"],
+        y=user_returns,
+        mode="lines",
+        name="User",
+        line=dict(color="#00FF00", width=3),
+        hovertemplate="<b>User</b><br>Date: %{x|%Y-%m-%d}<br>Return: %{y:.2f}%<extra></extra>"
     )
+)
 
-    # Add a horizontal line at y=0%
-    fig.add_hline(
-        y=0,
-        line_dash="solid",
-        line_color="rgba(100,100,100,0.3)",
-        line_width=1,
-        annotation_text="",
-        annotation_position="right"
-    )
+# Add a horizontal line at y=0%
+fig.add_hline(
+    y=0,
+    line_dash="solid",
+    line_color="rgba(100,100,100,0.3)",
+    line_width=1
+)
 
-    fig.update_layout(
-        height=400,
-        xaxis_title=None,
-        yaxis_title="Cumulative Return (%)",
-        hovermode="x unified",
-        showlegend=True,
-        margin=dict(l=50, r=20, t=20, b=40),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto", color="rgba(0,0,0,0.8)"),
-        legend=dict(
-            x=0.0,
-            y=1.0,
-            xanchor="left",
-            yanchor="top",
-            orientation="h",
-            bgcolor="rgba(255,255,255,0)",
-            bordercolor="rgba(0,0,0,0)",
-            borderwidth=0
-        ),
-        xaxis=dict(
-            showgrid=True,
-            gridwidth=1,
-            gridcolor="rgba(0,0,0,0.1)",
-            zeroline=False
-        ),
-        yaxis=dict(
-            showgrid=True,
-            gridwidth=1,
-            gridcolor="rgba(0,0,0,0.1)",
-            zeroline=False
-        )
+fig.update_layout(
+    height=450,
+    xaxis_title=None,
+    yaxis_title=None,
+    hovermode="x unified",
+    showlegend=False,
+    margin=dict(l=50, r=20, t=20, b=40),
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto"),
+    xaxis=dict(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(0,0,0,0.1)",
+        zeroline=False
+    ),
+    yaxis=dict(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(0,0,0,0.1)",
+        zeroline=False,
+        ticksuffix="%"
     )
+)
 
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-        config={"displayModeBar": False, "responsive": True}
-    )
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+st.plotly_chart(
+    fig,
+    use_container_width=True,
+    config={"displayModeBar": False, "responsive": True}
+)
