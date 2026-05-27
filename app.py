@@ -5,19 +5,19 @@ import numpy as np
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Swiss Pension Funds - Portfolio Analysis",
+    page_title="Portfolio Architecture",
     layout="wide",
     initial_sidebar_state="auto",
     menu_items=None
 )
 
-# Custom CSS for responsive design and Edge compatibility
+# Custom CSS for responsive design and finance-appropriate styling
 st.markdown("""
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-    /* Reset and base styles for Edge compatibility */
+    /* Reset and base styles */
     * {
         box-sizing: border-box;
     }
@@ -27,80 +27,93 @@ st.markdown("""
         -moz-osx-font-smoothing: grayscale;
     }
     
+    /* Color scheme - professional finance with neon green accents */
+    :root {
+        --primary-neon: #00FF00;
+        --primary-neon-dark: #00CC00;
+        --dark-bg: #0a0e27;
+        --dark-surface: #1a1f3a;
+        --light-bg: #ffffff;
+        --light-surface: #f5f7fa;
+        --text-dark: #1a1a1a;
+        --text-light: #e8e8e8;
+        --accent-positive: #00FF00;
+        --accent-neutral: #4a5568;
+    }
+    
+    /* Light mode */
+    [data-theme="light"] {
+        --bg-primary: var(--light-bg);
+        --bg-secondary: var(--light-surface);
+        --text-primary: var(--text-dark);
+        --border-color: #e0e0e0;
+        --accent-color: #00CC00;
+    }
+    
+    /* Dark mode */
+    [data-theme="dark"] {
+        --bg-primary: var(--dark-bg);
+        --bg-secondary: var(--dark-surface);
+        --text-primary: var(--text-light);
+        --border-color: #2a2a3e;
+        --accent-color: var(--primary-neon);
+    }
+    
     /* Main title styling */
     h1 {
         font-size: 2rem;
-        margin-bottom: 2rem;
-        font-weight: 600;
-        color: #262730;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-color);
+        letter-spacing: -0.5px;
     }
     
     /* Section headers */
     h2 {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
         font-weight: 600;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
-        color: #262730;
+        color: var(--text-primary);
     }
     
     /* Cockpit container */
     .cockpit-container {
-        background-color: #f0f2f6;
+        background-color: var(--bg-secondary);
         padding: 1.5rem;
         border-radius: 8px;
-        margin-bottom: 2rem;
-        border: 1px solid #e0e0e0;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
     }
     
-    /* Icon buttons styling */
-    .icon-button {
-        display: inline-block;
-        width: 44px;
-        height: 44px;
-        padding: 0;
-        margin: 0 4px;
+    /* Dropdown container */
+    .dropdown-container {
+        background-color: var(--bg-secondary);
+        padding: 1.5rem;
         border-radius: 8px;
-        border: 1px solid transparent;
-        background-color: #e8eef2;
-        cursor: pointer;
-        font-size: 1.2rem;
-        transition: background-color 0.2s ease, border-color 0.2s ease;
-        text-align: center;
-        line-height: 44px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
     }
     
-    .icon-button.active {
-        background-color: #0052CC;
-        color: white;
-        border-color: #0052CC;
-    }
-    
-    .icon-button:hover {
-        background-color: #d0d8e0;
-        border-color: #d0d8e0;
-    }
-    
-    .icon-button.active:hover {
-        background-color: #0052CC;
-        border-color: #0052CC;
-    }
-    
-    /* Slider styling */
+    /* Slider container */
     .slider-container {
-        background-color: #e8f0f8;
+        background-color: var(--bg-secondary);
         padding: 1.5rem;
         border-radius: 8px;
         margin-top: 1rem;
-        border: 1px solid #d0e4f7;
+        border: 1px solid var(--border-color);
     }
     
-    /* Performance chart container */
+    /* Slider styling override */
+    input[type="range"] {
+        accent-color: var(--accent-color);
+    }
+    
+    /* Performance chart container - transparent background */
     .performance-container {
-        background-color: #faf8f3;
         padding: 1.5rem;
         border-radius: 8px;
-        border: 1px solid #f0ede6;
+        border: 1px solid var(--border-color);
     }
     
     /* Input and button styles */
@@ -110,38 +123,77 @@ st.markdown("""
     select {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         font-size: 0.95rem;
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
+        border-color: var(--border-color);
     }
     
     button {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
     }
     
-    /* Ensure proper text rendering in Edge */
+    /* Text styling */
     body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
     }
     
-    @media (max-width: 900px) {
+    /* Responsive design */
+    @media (max-width: 1024px) {
         h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 1.7rem;
+            margin-bottom: 1rem;
         }
         
         h2 {
             font-size: 1.1rem;
             margin-top: 1rem;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.75rem;
         }
         
-        .cockpit-container {
+        .cockpit-container,
+        .dropdown-container,
+        .slider-container,
+        .performance-container {
             padding: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.4rem;
         }
         
-        .slider-container {
-            padding: 1rem;
-            margin-top: 0.8rem;
+        h2 {
+            font-size: 1rem;
         }
+        
+        .cockpit-container,
+        .dropdown-container,
+        .slider-container,
+        .performance-container {
+            padding: 0.75rem;
+        }
+    }
+    
+    /* Label styling */
+    .input-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: var(--text-primary);
+    }
+    
+    .value-display {
+        text-align: right;
+        font-weight: 600;
+        color: var(--accent-color);
+        min-width: 60px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -323,9 +375,6 @@ reference_weights = {
 }
 
 # Initialize session state for active input and slider values
-if "active_input" not in st.session_state:
-    st.session_state.active_input = "Equities/Bonds Ratio"
-
 if "eq_bond_value" not in st.session_state:
     st.session_state.eq_bond_value = 0.50
 
@@ -339,114 +388,86 @@ if "fx_hedge_value" not in st.session_state:
     st.session_state.fx_hedge_value = 0.80
 
 # Main title
-st.title("Swiss Pension Funds - Portfolio Analysis")
+st.title("Portfolio Architecture")
 
 # Define input descriptions
 input_descriptions = {
-    "Equities/Bonds Ratio": "Swiss pension funds allocate approximately 25% of their investments to real estate, with the remaining 75% split equally between equities and bonds. The Equities/Bond ratio determines this allocation.",
+    "Equities/Bonds Ratio": "Swiss pension funds allocate approximately 25% of their investments to real estate, with the remaining 75% split equally between equities and bonds. The Equities/Bond ratio controls this allocation.",
     "Home Bias Equities": "Swiss pension funds allocate approximately 1/3 of their listed equities to Swiss stocks. A ratio of 100% indicates that all listed equities are Swiss stocks.",
     "Yield Curve CHF": "Swiss pension funds invest approximately 3/4 of their bonds in CHF-denominated securities. A ratio of 100% indicates that all bonds are issued in Swiss francs.",
     "FX Hedging": "Swiss pension funds hedge approximately 80% of their foreign currency exposure. A ratio of 100% indicates that all foreign currency risk is fully hedged."
 }
 
-# Portfolio Cockpit section
-st.markdown("## Portfolio Cockpit")
+# Strategic Exposure section
+st.markdown("## Strategic Exposure")
 
-# Icon selector row
-col_icons = st.columns([0.3, 0.7], gap="small")
-with col_icons[1]:
-    icon_cols = st.columns(4, gap="small")
-    
-    icons = [
-        ("⚖️", "Equities/Bonds Ratio"),
-        ("🏠", "Home Bias Equities"),
-        ("📈", "Yield Curve CHF"),
-        ("🛡️", "FX Hedging")
-    ]
-    
-    for i, (icon, label) in enumerate(icons):
-        with icon_cols[i]:
-            is_active = st.session_state.active_input == label
-            button_style = "active" if is_active else ""
-            if st.button(icon, key=f"icon_{i}", help=label, use_container_width=True):
-                st.session_state.active_input = label
-                st.rerun()
-
-# Slider container
 with st.container():
-    st.markdown('<div class="slider-container">', unsafe_allow_html=True)
+    st.markdown('<div class="dropdown-container">', unsafe_allow_html=True)
     
-    if st.session_state.active_input == "Equities/Bonds Ratio":
-        label = "Equities/Bonds Ratio"
-        col1, col2, col3 = st.columns([1.5, 3, 0.5])
-        with col1:
-            st.write(label)
-        with col2:
+    # Use expanders for responsive design
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        with st.expander("⚖️ Equities/Bonds Ratio", expanded=True):
+            st.markdown('<span class="input-label">Equities/Bonds Ratio</span>', unsafe_allow_html=True)
             st.session_state.eq_bond_value = st.slider(
-                label,
+                "Equities/Bonds Ratio",
                 0.0,
                 1.0,
                 st.session_state.eq_bond_value,
                 0.01,
-                help=input_descriptions[label],
+                help=input_descriptions["Equities/Bonds Ratio"],
                 label_visibility="collapsed"
             )
-        with col3:
-            st.write(f"{st.session_state.eq_bond_value*100:.0f}%")
+            col_val, col_pct = st.columns([1, 0.5])
+            with col_pct:
+                st.markdown(f'<div class="value-display">{st.session_state.eq_bond_value*100:.0f}%</div>', unsafe_allow_html=True)
         
-    elif st.session_state.active_input == "Home Bias Equities":
-        label = "Home Bias Equities"
-        col1, col2, col3 = st.columns([1.5, 3, 0.5])
-        with col1:
-            st.write(label)
-        with col2:
-            st.session_state.home_bias_value = st.slider(
-                label,
-                0.0,
-                1.0,
-                st.session_state.home_bias_value,
-                0.01,
-                help=input_descriptions[label],
-                label_visibility="collapsed"
-            )
-        with col3:
-            st.write(f"{st.session_state.home_bias_value*100:.0f}%")
-        
-    elif st.session_state.active_input == "Yield Curve CHF":
-        label = "Yield Curve CHF"
-        col1, col2, col3 = st.columns([1.5, 3, 0.5])
-        with col1:
-            st.write(label)
-        with col2:
+        with st.expander("📈 Yield Curve CHF"):
+            st.markdown('<span class="input-label">Yield Curve CHF</span>', unsafe_allow_html=True)
             st.session_state.yield_curve_value = st.slider(
-                label,
+                "Yield Curve CHF",
                 0.0,
                 1.0,
                 st.session_state.yield_curve_value,
                 0.01,
-                help=input_descriptions[label],
+                help=input_descriptions["Yield Curve CHF"],
                 label_visibility="collapsed"
             )
-        with col3:
-            st.write(f"{st.session_state.yield_curve_value*100:.0f}%")
+            col_val, col_pct = st.columns([1, 0.5])
+            with col_pct:
+                st.markdown(f'<div class="value-display">{st.session_state.yield_curve_value*100:.0f}%</div>', unsafe_allow_html=True)
+    
+    with col2:
+        with st.expander("🏠 Home Bias Equities"):
+            st.markdown('<span class="input-label">Home Bias Equities</span>', unsafe_allow_html=True)
+            st.session_state.home_bias_value = st.slider(
+                "Home Bias Equities",
+                0.0,
+                1.0,
+                st.session_state.home_bias_value,
+                0.01,
+                help=input_descriptions["Home Bias Equities"],
+                label_visibility="collapsed"
+            )
+            col_val, col_pct = st.columns([1, 0.5])
+            with col_pct:
+                st.markdown(f'<div class="value-display">{st.session_state.home_bias_value*100:.0f}%</div>', unsafe_allow_html=True)
         
-    else:  # FX Hedging
-        label = "FX Hedging"
-        col1, col2, col3 = st.columns([1.5, 3, 0.5])
-        with col1:
-            st.write(label)
-        with col2:
+        with st.expander("🛡️ FX Hedging"):
+            st.markdown('<span class="input-label">FX Hedging</span>', unsafe_allow_html=True)
             st.session_state.fx_hedge_value = st.slider(
-                label,
+                "FX Hedging",
                 0.0,
                 1.0,
                 st.session_state.fx_hedge_value,
                 0.01,
-                help=input_descriptions[label],
+                help=input_descriptions["FX Hedging"],
                 label_visibility="collapsed"
             )
-        with col3:
-            st.write(f"{st.session_state.fx_hedge_value*100:.0f}%")
+            col_val, col_pct = st.columns([1, 0.5])
+            with col_pct:
+                st.markdown(f'<div class="value-display">{st.session_state.fx_hedge_value*100:.0f}%</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -483,7 +504,7 @@ with st.container():
             y=reference_index,
             mode="lines",
             name="Reference Portfolio",
-            line=dict(color="#e0e0e0", width=2)
+            line=dict(color="#808080", width=2, dash="dash")
         )
     )
 
@@ -493,7 +514,7 @@ with st.container():
             y=user_index,
             mode="lines",
             name="User Portfolio",
-            line=dict(color="#0052CC", width=2)
+            line=dict(color="#00FF00", width=3)
         )
     )
 
@@ -504,15 +525,30 @@ with st.container():
         hovermode="x unified",
         showlegend=True,
         margin=dict(l=40, r=20, t=20, b=40),
-        paper_bgcolor="#faf8f3",
-        plot_bgcolor="#faf8f3",
-        font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto"),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto", color="rgba(0,0,0,0.8)"),
         legend=dict(
             x=0.5,
             y=-0.15,
             xanchor="center",
             yanchor="top",
-            orientation="h"
+            orientation="h",
+            bgcolor="rgba(255,255,255,0.8)",
+            bordercolor="rgba(0,0,0,0.2)",
+            borderwidth=1
+        ),
+        xaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor="rgba(0,0,0,0.1)",
+            zeroline=False
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor="rgba(0,0,0,0.1)",
+            zeroline=False
         )
     )
 
