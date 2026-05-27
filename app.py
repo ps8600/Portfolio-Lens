@@ -4,16 +4,35 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="Swiss Pension Funds - Portfolio Analysis", layout="wide")
+st.set_page_config(
+    page_title="Swiss Pension Funds - Portfolio Analysis",
+    layout="wide",
+    initial_sidebar_state="auto",
+    menu_items=None
+)
 
-# Custom CSS for responsive design
+# Custom CSS for responsive design and Edge compatibility
 st.markdown("""
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+    /* Reset and base styles for Edge compatibility */
+    * {
+        box-sizing: border-box;
+    }
+    
+    html, body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    
     /* Main title styling */
     h1 {
         font-size: 2rem;
         margin-bottom: 2rem;
         font-weight: 600;
+        color: #262730;
     }
     
     /* Section headers */
@@ -22,6 +41,7 @@ st.markdown("""
         font-weight: 600;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
+        color: #262730;
     }
     
     /* Cockpit container */
@@ -30,6 +50,7 @@ st.markdown("""
         padding: 1.5rem;
         border-radius: 8px;
         margin-bottom: 2rem;
+        border: 1px solid #e0e0e0;
     }
     
     /* Icon buttons styling */
@@ -40,24 +61,29 @@ st.markdown("""
         padding: 0;
         margin: 0 4px;
         border-radius: 8px;
-        border: none;
+        border: 1px solid transparent;
         background-color: #e8eef2;
         cursor: pointer;
         font-size: 1.2rem;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+        text-align: center;
+        line-height: 44px;
     }
     
     .icon-button.active {
         background-color: #0052CC;
         color: white;
+        border-color: #0052CC;
     }
     
     .icon-button:hover {
         background-color: #d0d8e0;
+        border-color: #d0d8e0;
     }
     
     .icon-button.active:hover {
         background-color: #0052CC;
+        border-color: #0052CC;
     }
     
     /* Slider styling */
@@ -66,6 +92,7 @@ st.markdown("""
         padding: 1.5rem;
         border-radius: 8px;
         margin-top: 1rem;
+        border: 1px solid #d0e4f7;
     }
     
     /* Performance chart container */
@@ -73,6 +100,25 @@ st.markdown("""
         background-color: #faf8f3;
         padding: 1.5rem;
         border-radius: 8px;
+        border: 1px solid #f0ede6;
+    }
+    
+    /* Input and button styles */
+    input[type="range"],
+    input[type="text"],
+    input[type="number"],
+    select {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-size: 0.95rem;
+    }
+    
+    button {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    /* Ensure proper text rendering in Edge */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
     
     @media (max-width: 900px) {
@@ -297,7 +343,7 @@ st.title("Swiss Pension Funds - Portfolio Analysis")
 
 # Define input descriptions
 input_descriptions = {
-    "Equities/Bonds Ratio": "Swiss pension funds allocate approximately 25% of their investments to real estate, with the remaining 75% split equally between equities and bonds. The Equities/Bonds Ratio indicates the percentage of equities in the liquid portfolio (excluding real estate). For example, a ratio of 100% means all investments are in equities with no bonds, while 25% real estate is included in the overall allocation.",
+    "Equities/Bonds Ratio": "Swiss pension funds allocate approximately 25% of their investments to real estate, with the remaining 75% split equally between equities and bonds. The Equities/Bond ratio determines this allocation.",
     "Home Bias Equities": "Swiss pension funds allocate approximately 1/3 of their listed equities to Swiss stocks. A ratio of 100% indicates that all listed equities are Swiss stocks.",
     "Yield Curve CHF": "Swiss pension funds invest approximately 3/4 of their bonds in CHF-denominated securities. A ratio of 100% indicates that all bonds are issued in Swiss francs.",
     "FX Hedging": "Swiss pension funds hedge approximately 80% of their foreign currency exposure. A ratio of 100% indicates that all foreign currency risk is fully hedged."
@@ -460,7 +506,7 @@ with st.container():
         margin=dict(l=40, r=20, t=20, b=40),
         paper_bgcolor="#faf8f3",
         plot_bgcolor="#faf8f3",
-        font=dict(size=12),
+        font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto"),
         legend=dict(
             x=0.5,
             y=-0.15,
@@ -473,7 +519,7 @@ with st.container():
     st.plotly_chart(
         fig,
         use_container_width=True,
-        config={"displayModeBar": False}
+        config={"displayModeBar": False, "responsive": True}
     )
     
     st.markdown('</div>', unsafe_allow_html=True)
