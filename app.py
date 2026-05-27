@@ -24,11 +24,27 @@ header {visibility: hidden;}
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Minimal inline CSS
+# Dynamic CSS for light/dark mode
 st.markdown("""
     <style>
+    :root {
+        --primary-neon-light: #00CC00;
+        --primary-neon-dark: #00FF00;
+        --text-light: #000000;
+        --text-dark: #FFFFFF;
+        --bg-light: #FFFFFF;
+        --bg-dark: #0a0e27;
+    }
+    
+    /* Light mode (default) */
     input[type="range"] {
-        accent-color: #00FF00;
+        accent-color: #00CC00;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+        input[type="range"] {
+            accent-color: #00FF00;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -183,14 +199,19 @@ def calculate_user_weights(eq_bond, home_bias, yield_curve, fx_hedge):
 
 def calculate_portfolio_returns(df, weights, asset_cols):
     """Calculate cumulative returns starting from 0%"""
-    returns = df[asset_cols].pct_change().fillna(0)
+    # Get price data
+    price_data = df[asset_cols].copy()
     
+    # Calculate returns for each asset
+    returns = price_data.pct_change().fillna(0)
+    
+    # Apply weights and calculate weighted returns
     weighted_returns = returns.mul(
         pd.Series(weights),
         axis=1
     ).sum(axis=1)
     
-    # Calculate cumulative returns (starting from 0%)
+    # Calculate cumulative returns (geometric compounding)
     cumulative_returns = (1 + weighted_returns).cumprod() - 1
     
     return cumulative_returns * 100  # Convert to percentage
@@ -210,18 +231,18 @@ reference_weights = {
     "Real_Estate_CH_unlisted": 0.25,
 }
 
-# Initialize session state for active input and slider values
+# Initialize session state for slider values
 if "eq_bond_value" not in st.session_state:
-    st.session_state.eq_bond_value = 0.50
+    st.session_state.eq_bond_value = 50
 
 if "home_bias_value" not in st.session_state:
-    st.session_state.home_bias_value = 1/3
+    st.session_state.home_bias_value = 33.33
 
 if "yield_curve_value" not in st.session_state:
-    st.session_state.yield_curve_value = 0.75
+    st.session_state.yield_curve_value = 75
 
 if "fx_hedge_value" not in st.session_state:
-    st.session_state.fx_hedge_value = 0.80
+    st.session_state.fx_hedge_value = 80
 
 # Main title
 st.title("Portfolio Architecture")
@@ -232,78 +253,67 @@ st.markdown("## Strategic Exposure")
 col1, col2 = st.columns(2)
 
 with col1:
-    with st.expander("⚖️ Equities/Bonds Ratio", expanded=True):
-        st.session_state.eq_bond_value = st.slider(
+    with st.expander("⚖️ Equities/Bonds Ratio"):
+        eq_bond_pct = st.slider(
             "Equities/Bonds Ratio",
-            0.0,
-            1.0,
+            0,
+            100,
             st.session_state.eq_bond_value,
-            0.01,
+            1,
             label_visibility="collapsed"
         )
-        col_val, col_pct = st.columns([1, 0.5])
-        with col_pct:
-            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.eq_bond_value*100:.0f}%</div>', unsafe_allow_html=True)
-        st.caption("Reference: ½ = 50%")
+        st.session_state.eq_bond_value = eq_bond_pct
     
     with st.expander("📈 Yield Curve CHF"):
-        st.session_state.yield_curve_value = st.slider(
+        yield_curve_pct = st.slider(
             "Yield Curve CHF",
-            0.0,
-            1.0,
+            0,
+            100,
             st.session_state.yield_curve_value,
-            0.01,
+            1,
             label_visibility="collapsed"
         )
-        col_val, col_pct = st.columns([1, 0.5])
-        with col_pct:
-            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.yield_curve_value*100:.0f}%</div>', unsafe_allow_html=True)
-        st.caption("Reference: ¾ = 75%")
+        st.session_state.yield_curve_value = yield_curve_pct
 
 with col2:
     with st.expander("🏠 Home Bias Equities"):
-        st.session_state.home_bias_value = st.slider(
+        home_bias_pct = st.slider(
             "Home Bias Equities",
-            0.0,
-            1.0,
+            0,
+            100,
             st.session_state.home_bias_value,
-            0.01,
+            1,
             label_visibility="collapsed"
         )
-        col_val, col_pct = st.columns([1, 0.5])
-        with col_pct:
-            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.home_bias_value*100:.0f}%</div>', unsafe_allow_html=True)
-        st.caption("Reference: ⅓ = 33%")
+        st.session_state.home_bias_value = home_bias_pct
     
     with st.expander("🛡️ FX Hedging"):
-        st.session_state.fx_hedge_value = st.slider(
+        fx_hedge_pct = st.slider(
             "FX Hedging",
-            0.0,
-            1.0,
+            0,
+            100,
             st.session_state.fx_hedge_value,
-            0.01,
+            1,
             label_visibility="collapsed"
         )
-        col_val, col_pct = st.columns([1, 0.5])
-        with col_pct:
-            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.fx_hedge_value*100:.0f}%</div>', unsafe_allow_html=True)
-        st.caption("Reference: ⅘ = 80%")
+        st.session_state.fx_hedge_value = fx_hedge_pct
 
 # Reset to reference button
 col_button1, col_button2, col_button3 = st.columns([1, 4, 1])
 with col_button1:
     if st.button("📍 Reset", use_container_width=True):
-        st.session_state.eq_bond_value = 0.50
-        st.session_state.home_bias_value = 1/3
-        st.session_state.yield_curve_value = 0.75
-        st.session_state.fx_hedge_value = 0.80
+        st.session_state.eq_bond_value = 50
+        st.session_state.home_bias_value = 33.33
+        st.session_state.yield_curve_value = 75
+        st.session_state.fx_hedge_value = 80
         st.rerun()
 
+# Convert percentages to decimals for calculation
 user_weights = calculate_user_weights(
-    st.session_state.eq_bond_value,
-    st.session_state.home_bias_value,
-    st.session_state.yield_curve_value,
-    st.session_state.fx_hedge_value
+    st.session_state.eq_bond_value / 100,
+    st.session_state.home_bias_value / 100,
+    st.session_state.yield_curve_value / 100,
+    st.session_state.fx_hedge_value / 100
 )
 
 # Performance section
@@ -321,6 +331,15 @@ user_returns = calculate_portfolio_returns(
     asset_cols
 )
 
+# Determine color scheme based on Streamlit theme
+try:
+    is_dark_mode = st.get_option("theme.base") == "dark"
+except:
+    is_dark_mode = False
+
+reference_color = "#00FF00" if is_dark_mode else "#00CC00"
+user_color = "#00FF00"
+
 fig = go.Figure()
 
 fig.add_trace(
@@ -329,7 +348,7 @@ fig.add_trace(
         y=reference_returns,
         mode="lines",
         name="Reference",
-        line=dict(color="#808080", width=2, dash="dash"),
+        line=dict(color=reference_color, width=2, dash="dash"),
         hovertemplate="<b>Reference</b><br>Date: %{x|%Y-%m-%d}<br>Return: %{y:.2f}%<extra></extra>"
     )
 )
@@ -340,7 +359,7 @@ fig.add_trace(
         y=user_returns,
         mode="lines",
         name="User",
-        line=dict(color="#00FF00", width=3),
+        line=dict(color=user_color, width=3),
         hovertemplate="<b>User</b><br>Date: %{x|%Y-%m-%d}<br>Return: %{y:.2f}%<extra></extra>"
     )
 )
@@ -353,6 +372,10 @@ fig.add_hline(
     line_width=1
 )
 
+# Determine text color based on theme
+text_color = "#000000" if not is_dark_mode else "#FFFFFF"
+grid_color = "rgba(0,0,0,0.1)" if not is_dark_mode else "rgba(255,255,255,0.1)"
+
 fig.update_layout(
     height=450,
     xaxis_title=None,
@@ -362,19 +385,21 @@ fig.update_layout(
     margin=dict(l=50, r=20, t=20, b=40),
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto"),
+    font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto", color=text_color),
     xaxis=dict(
         showgrid=True,
         gridwidth=1,
-        gridcolor="rgba(0,0,0,0.1)",
-        zeroline=False
+        gridcolor=grid_color,
+        zeroline=False,
+        color=text_color
     ),
     yaxis=dict(
         showgrid=True,
         gridwidth=1,
-        gridcolor="rgba(0,0,0,0.1)",
+        gridcolor=grid_color,
         zeroline=False,
-        ticksuffix="%"
+        ticksuffix="%",
+        color=text_color
     )
 )
 
