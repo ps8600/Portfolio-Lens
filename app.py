@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -10,6 +9,16 @@ st.set_page_config(
     initial_sidebar_state="auto",
     menu_items=None
 )
+
+# Hide Streamlit styling code
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Custom CSS for responsive design and finance-appropriate styling
 st.markdown("""
@@ -77,36 +86,22 @@ st.markdown("""
         color: var(--text-primary);
     }
     
-    /* Cockpit container */
-    .cockpit-container {
-        background-color: var(--bg-secondary);
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--border-color);
-    }
-    
     /* Dropdown container */
     .dropdown-container {
         background-color: var(--bg-secondary);
-        padding: 1.5rem;
+        padding: 1rem;
         border-radius: 8px;
         border: 1px solid var(--border-color);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
     
     /* Slider container */
     .slider-container {
         background-color: var(--bg-secondary);
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-top: 1rem;
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
         border: 1px solid var(--border-color);
-    }
-    
-    /* Slider styling override */
-    input[type="range"] {
-        accent-color: var(--accent-color);
     }
     
     /* Performance chart container - transparent background */
@@ -114,6 +109,11 @@ st.markdown("""
         padding: 1.5rem;
         border-radius: 8px;
         border: 1px solid var(--border-color);
+    }
+    
+    /* Slider styling override */
+    input[type="range"] {
+        accent-color: var(--accent-color);
     }
     
     /* Input and button styles */
@@ -155,12 +155,11 @@ st.markdown("""
             margin-bottom: 0.75rem;
         }
         
-        .cockpit-container,
         .dropdown-container,
         .slider-container,
         .performance-container {
-            padding: 1rem;
-            margin-bottom: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
         }
     }
     
@@ -173,27 +172,41 @@ st.markdown("""
             font-size: 1rem;
         }
         
-        .cockpit-container,
         .dropdown-container,
         .slider-container,
         .performance-container {
-            padding: 0.75rem;
+            padding: 0.5rem;
         }
     }
     
     /* Label styling */
     .input-label {
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
         display: block;
         color: var(--text-primary);
+        font-size: 0.95rem;
     }
     
     .value-display {
         text-align: right;
         font-weight: 600;
         color: var(--accent-color);
-        min-width: 60px;
+        min-width: 50px;
+        font-size: 0.9rem;
+    }
+    
+    .info-text {
+        font-size: 0.8rem;
+        color: var(--accent-neutral);
+        margin-top: 0.25rem;
+        line-height: 1.3;
+    }
+    
+    .reference-indicator {
+        font-size: 0.75rem;
+        color: #888888;
+        margin-top: 0.1rem;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -346,18 +359,19 @@ def calculate_user_weights(eq_bond, home_bias, yield_curve, fx_hedge):
     return e
 
 
-def calculate_portfolio_index(df, weights, asset_cols):
-
+def calculate_portfolio_returns(df, weights, asset_cols):
+    """Calculate cumulative returns starting from 0%"""
     returns = df[asset_cols].pct_change().fillna(0)
-
+    
     weighted_returns = returns.mul(
         pd.Series(weights),
         axis=1
     ).sum(axis=1)
-
-    index_series = 100 * (1 + weighted_returns).cumprod()
-
-    return index_series
+    
+    # Calculate cumulative returns (starting from 0%)
+    cumulative_returns = (1 + weighted_returns).cumprod() - 1
+    
+    return cumulative_returns * 100  # Convert to percentage
 
 
 df, asset_cols = load_data()
@@ -390,12 +404,28 @@ if "fx_hedge_value" not in st.session_state:
 # Main title
 st.title("Portfolio Architecture")
 
-# Define input descriptions
-input_descriptions = {
-    "Equities/Bonds Ratio": "Swiss pension funds allocate approximately 25% of their investments to real estate, with the remaining 75% split equally between equities and bonds. The Equities/Bond ratio controls this allocation.",
-    "Home Bias Equities": "Swiss pension funds allocate approximately 1/3 of their listed equities to Swiss stocks. A ratio of 100% indicates that all listed equities are Swiss stocks.",
-    "Yield Curve CHF": "Swiss pension funds invest approximately 3/4 of their bonds in CHF-denominated securities. A ratio of 100% indicates that all bonds are issued in Swiss francs.",
-    "FX Hedging": "Swiss pension funds hedge approximately 80% of their foreign currency exposure. A ratio of 100% indicates that all foreign currency risk is fully hedged."
+# Define input descriptions and reference values
+input_config = {
+    "Equities/Bonds Ratio": {
+        "description": "Allocate between equities and bonds. Swiss pension funds typically allocate 50% to equities and 50% to bonds (excluding real estate).",
+        "reference": 0.50,
+        "reference_display": "50%"
+    },
+    "Home Bias Equities": {
+        "description": "Allocate between Swiss and global equities. Swiss pension funds typically allocate 1/3 to Swiss stocks and 2/3 to global stocks.",
+        "reference": 1/3,
+        "reference_display": "33%"
+    },
+    "Yield Curve CHF": {
+        "description": "Allocate between CHF-denominated and foreign bonds. Swiss pension funds typically allocate 75% to CHF bonds and 25% to foreign bonds.",
+        "reference": 0.75,
+        "reference_display": "75%"
+    },
+    "FX Hedging": {
+        "description": "Control FX hedging of foreign currency exposure. Swiss pension funds typically hedge approximately 80% of their foreign currency exposure.",
+        "reference": 0.80,
+        "reference_display": "80%"
+    }
 }
 
 # Strategic Exposure section
@@ -410,13 +440,15 @@ with st.container():
     with col1:
         with st.expander("⚖️ Equities/Bonds Ratio", expanded=True):
             st.markdown('<span class="input-label">Equities/Bonds Ratio</span>', unsafe_allow_html=True)
+            st.markdown(f'<div class="info-text">{input_config["Equities/Bonds Ratio"]["description"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="reference-indicator">Reference: {input_config["Equities/Bonds Ratio"]["reference_display"]}</div>', unsafe_allow_html=True)
+            
             st.session_state.eq_bond_value = st.slider(
                 "Equities/Bonds Ratio",
                 0.0,
                 1.0,
                 st.session_state.eq_bond_value,
                 0.01,
-                help=input_descriptions["Equities/Bonds Ratio"],
                 label_visibility="collapsed"
             )
             col_val, col_pct = st.columns([1, 0.5])
@@ -425,13 +457,15 @@ with st.container():
         
         with st.expander("📈 Yield Curve CHF"):
             st.markdown('<span class="input-label">Yield Curve CHF</span>', unsafe_allow_html=True)
+            st.markdown(f'<div class="info-text">{input_config["Yield Curve CHF"]["description"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="reference-indicator">Reference: {input_config["Yield Curve CHF"]["reference_display"]}</div>', unsafe_allow_html=True)
+            
             st.session_state.yield_curve_value = st.slider(
                 "Yield Curve CHF",
                 0.0,
                 1.0,
                 st.session_state.yield_curve_value,
                 0.01,
-                help=input_descriptions["Yield Curve CHF"],
                 label_visibility="collapsed"
             )
             col_val, col_pct = st.columns([1, 0.5])
@@ -441,13 +475,15 @@ with st.container():
     with col2:
         with st.expander("🏠 Home Bias Equities"):
             st.markdown('<span class="input-label">Home Bias Equities</span>', unsafe_allow_html=True)
+            st.markdown(f'<div class="info-text">{input_config["Home Bias Equities"]["description"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="reference-indicator">Reference: {input_config["Home Bias Equities"]["reference_display"]}</div>', unsafe_allow_html=True)
+            
             st.session_state.home_bias_value = st.slider(
                 "Home Bias Equities",
                 0.0,
                 1.0,
                 st.session_state.home_bias_value,
                 0.01,
-                help=input_descriptions["Home Bias Equities"],
                 label_visibility="collapsed"
             )
             col_val, col_pct = st.columns([1, 0.5])
@@ -456,13 +492,15 @@ with st.container():
         
         with st.expander("🛡️ FX Hedging"):
             st.markdown('<span class="input-label">FX Hedging</span>', unsafe_allow_html=True)
+            st.markdown(f'<div class="info-text">{input_config["FX Hedging"]["description"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="reference-indicator">Reference: {input_config["FX Hedging"]["reference_display"]}</div>', unsafe_allow_html=True)
+            
             st.session_state.fx_hedge_value = st.slider(
                 "FX Hedging",
                 0.0,
                 1.0,
                 st.session_state.fx_hedge_value,
                 0.01,
-                help=input_descriptions["FX Hedging"],
                 label_visibility="collapsed"
             )
             col_val, col_pct = st.columns([1, 0.5])
@@ -470,6 +508,16 @@ with st.container():
                 st.markdown(f'<div class="value-display">{st.session_state.fx_hedge_value*100:.0f}%</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
+
+# Reset to reference button
+col_button1, col_button2, col_button3 = st.columns([1, 4, 1])
+with col_button1:
+    if st.button("📍 Reset to Reference", use_container_width=True):
+        st.session_state.eq_bond_value = 0.50
+        st.session_state.home_bias_value = 1/3
+        st.session_state.yield_curve_value = 0.75
+        st.session_state.fx_hedge_value = 0.80
+        st.rerun()
 
 user_weights = calculate_user_weights(
     st.session_state.eq_bond_value,
@@ -484,13 +532,13 @@ st.markdown("## Performance")
 with st.container():
     st.markdown('<div class="performance-container">', unsafe_allow_html=True)
     
-    reference_index = calculate_portfolio_index(
+    reference_returns = calculate_portfolio_returns(
         df,
         reference_weights,
         asset_cols
     )
 
-    user_index = calculate_portfolio_index(
+    user_returns = calculate_portfolio_returns(
         df,
         user_weights,
         asset_cols
@@ -501,7 +549,7 @@ with st.container():
     fig.add_trace(
         go.Scatter(
             x=df["Date"],
-            y=reference_index,
+            y=reference_returns,
             mode="lines",
             name="Reference Portfolio",
             line=dict(color="#808080", width=2, dash="dash")
@@ -511,32 +559,42 @@ with st.container():
     fig.add_trace(
         go.Scatter(
             x=df["Date"],
-            y=user_index,
+            y=user_returns,
             mode="lines",
             name="User Portfolio",
             line=dict(color="#00FF00", width=3)
         )
     )
 
+    # Add a horizontal line at y=0%
+    fig.add_hline(
+        y=0,
+        line_dash="solid",
+        line_color="rgba(100,100,100,0.3)",
+        line_width=1,
+        annotation_text="",
+        annotation_position="right"
+    )
+
     fig.update_layout(
-        height=450,
+        height=400,
         xaxis_title=None,
-        yaxis_title=None,
+        yaxis_title="Cumulative Return (%)",
         hovermode="x unified",
         showlegend=True,
-        margin=dict(l=40, r=20, t=20, b=40),
+        margin=dict(l=50, r=20, t=20, b=40),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(size=12, family="Segoe UI, -apple-system, BlinkMacSystemFont, Roboto", color="rgba(0,0,0,0.8)"),
         legend=dict(
-            x=0.5,
-            y=-0.15,
-            xanchor="center",
+            x=0.0,
+            y=1.0,
+            xanchor="left",
             yanchor="top",
             orientation="h",
-            bgcolor="rgba(255,255,255,0.8)",
-            bordercolor="rgba(0,0,0,0.2)",
-            borderwidth=1
+            bgcolor="rgba(255,255,255,0)",
+            bordercolor="rgba(0,0,0,0)",
+            borderwidth=0
         ),
         xaxis=dict(
             showgrid=True,
