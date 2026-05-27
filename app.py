@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="Portfolio Lens", layout="wide")
+st.set_page_config(page_title="Swiss Pension Funds - Portfolio Analysis", layout="wide")
 
 @st.cache_data
 def load_data():
@@ -182,11 +182,23 @@ reference_weights = {
     "Real_Estate_CH_unlisted": 0.25,
 }
 
-# Initialize session state for active input
+# Initialize session state for active input and slider values
 if "active_input" not in st.session_state:
     st.session_state.active_input = "Equities/Bonds Ratio"
 
-st.title("Portfolio Lens")
+if "eq_bond_value" not in st.session_state:
+    st.session_state.eq_bond_value = 0.50
+
+if "home_bias_value" not in st.session_state:
+    st.session_state.home_bias_value = 0.33
+
+if "yield_curve_value" not in st.session_state:
+    st.session_state.yield_curve_value = 0.75
+
+if "fx_hedge_value" not in st.session_state:
+    st.session_state.fx_hedge_value = 0.80
+
+st.title("Swiss Pension Funds - Portfolio Analysis")
 
 # Define input descriptions
 input_descriptions = {
@@ -199,88 +211,112 @@ input_descriptions = {
 left, right = st.columns([1, 3])
 
 with left:
-    # User Input header with icons
-    header_col1, header_col2 = st.columns([2, 1])
+    # User Input header with horizontal icons
+    header_col1, header_col2 = st.columns([1, 1.5])
     
     with header_col1:
-        st.markdown("### **User Input**")
+        st.markdown("#### **Portfolio Cockpit**")
     
     with header_col2:
-        icon_cols = st.columns(4)
+        icon_cols = st.columns(4, gap="small")
+        
         with icon_cols[0]:
-            if st.button("📊", key="eq_bond_btn", help="Equities/Bonds Ratio"):
+            if st.button("⚖️", key="eq_bond_btn", help="Equities/Bonds Ratio"):
                 st.session_state.active_input = "Equities/Bonds Ratio"
+                st.rerun()
+            # Highlight if active
+            if st.session_state.active_input == "Equities/Bonds Ratio":
+                st.markdown(
+                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
+                    unsafe_allow_html=True
+                )
+        
         with icon_cols[1]:
             if st.button("🏠", key="home_bias_btn", help="Home Bias Equities"):
                 st.session_state.active_input = "Home Bias Equities"
+                st.rerun()
+            if st.session_state.active_input == "Home Bias Equities":
+                st.markdown(
+                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
+                    unsafe_allow_html=True
+                )
+        
         with icon_cols[2]:
             if st.button("📈", key="yield_btn", help="Yield Curve CHF"):
                 st.session_state.active_input = "Yield Curve CHF"
+                st.rerun()
+            if st.session_state.active_input == "Yield Curve CHF":
+                st.markdown(
+                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
+                    unsafe_allow_html=True
+                )
+        
         with icon_cols[3]:
             if st.button("🛡️", key="fx_btn", help="FX Hedging"):
                 st.session_state.active_input = "FX Hedging"
+                st.rerun()
+            if st.session_state.active_input == "FX Hedging":
+                st.markdown(
+                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
+                    unsafe_allow_html=True
+                )
     
     st.divider()
     
     # Display active input slider
     if st.session_state.active_input == "Equities/Bonds Ratio":
-        eq_bond = st.slider(
+        st.session_state.eq_bond_value = st.slider(
             "Equities / Bonds Ratio",
             0.0,
             1.0,
-            0.70,
+            st.session_state.eq_bond_value,
             0.01,
-            help=input_descriptions["Equities/Bonds Ratio"]
+            help=input_descriptions["Equities/Bonds Ratio"],
+            label_visibility="visible"
         )
-        home_bias = 0.60
-        yield_curve = 0.10
-        fx_hedge = 0.00
+        
     elif st.session_state.active_input == "Home Bias Equities":
-        home_bias = st.slider(
+        st.session_state.home_bias_value = st.slider(
             "Home Bias Equities",
             0.0,
             1.0,
-            0.60,
+            st.session_state.home_bias_value,
             0.01,
-            help=input_descriptions["Home Bias Equities"]
+            help=input_descriptions["Home Bias Equities"],
+            label_visibility="visible"
         )
-        eq_bond = 0.70
-        yield_curve = 0.10
-        fx_hedge = 0.00
+        
     elif st.session_state.active_input == "Yield Curve CHF":
-        yield_curve = st.slider(
+        st.session_state.yield_curve_value = st.slider(
             "Yield Curve CHF",
             0.0,
             1.0,
-            0.10,
+            st.session_state.yield_curve_value,
             0.01,
-            help=input_descriptions["Yield Curve CHF"]
+            help=input_descriptions["Yield Curve CHF"],
+            label_visibility="visible"
         )
-        eq_bond = 0.70
-        home_bias = 0.60
-        fx_hedge = 0.00
+        
     else:  # FX Hedging
-        fx_hedge = st.slider(
+        st.session_state.fx_hedge_value = st.slider(
             "FX Hedging",
             0.0,
             1.0,
-            0.00,
+            st.session_state.fx_hedge_value,
             0.01,
-            help=input_descriptions["FX Hedging"]
+            help=input_descriptions["FX Hedging"],
+            label_visibility="visible"
         )
-        eq_bond = 0.70
-        home_bias = 0.60
-        yield_curve = 0.10
 
     user_weights = calculate_user_weights(
-        eq_bond,
-        home_bias,
-        yield_curve,
-        fx_hedge
+        st.session_state.eq_bond_value,
+        st.session_state.home_bias_value,
+        st.session_state.yield_curve_value,
+        st.session_state.fx_hedge_value
     )
 
 with right:
-    st.markdown("### **Portfolio Performance**")
+    st.markdown("#### **Portfolio Performance**")
     st.divider()
 
     reference_index = calculate_portfolio_index(
