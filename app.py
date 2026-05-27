@@ -182,49 +182,95 @@ reference_weights = {
     "Real_Estate_CH_unlisted": 0.25,
 }
 
+# Initialize session state for active input
+if "active_input" not in st.session_state:
+    st.session_state.active_input = "Equities/Bonds Ratio"
+
 st.title("Portfolio Lens")
+
+# Define input descriptions
+input_descriptions = {
+    "Equities/Bonds Ratio": "Swiss pension funds allocate approximately 25% of their investments to real estate, with the remaining 75% split equally between equities and bonds. The Equities/Bonds Ratio indicates the percentage of equities in the liquid portfolio (excluding real estate). For example, a ratio of 100% means all investments are in equities with no bonds, while 25% real estate is included in the overall allocation.",
+    "Home Bias Equities": "Swiss pension funds allocate approximately 1/3 of their listed equities to Swiss stocks. A ratio of 100% indicates that all listed equities are Swiss stocks.",
+    "Yield Curve CHF": "Swiss pension funds invest approximately 3/4 of their bonds in CHF-denominated securities. A ratio of 100% indicates that all bonds are issued in Swiss francs.",
+    "FX Hedging": "Swiss pension funds hedge approximately 80% of their foreign currency exposure. A ratio of 100% indicates that all foreign currency risk is fully hedged."
+}
 
 left, right = st.columns([1, 3])
 
 with left:
-
-    st.header("Inputs")
-
-    eq_bond = st.slider(
-        "Equities / Bonds Ratio",
-        0.0,
-        1.0,
-        0.70,
-        0.01,
-        help="Reference portfolio = 0.70"
-    )
-
-    home_bias = st.slider(
-        "Home Bias Equities",
-        0.0,
-        1.0,
-        0.60,
-        0.01,
-        help="Reference portfolio = 0.60"
-    )
-
-    yield_curve = st.slider(
-        "Yield Curve CHF",
-        0.0,
-        1.0,
-        0.10,
-        0.01,
-        help="Reference portfolio = 0.10"
-    )
-
-    fx_hedge = st.slider(
-        "FX Hedging",
-        0.0,
-        1.0,
-        0.00,
-        0.01,
-        help="Reference portfolio = 0.00"
-    )
+    # User Input header with icons
+    header_col1, header_col2 = st.columns([2, 1])
+    
+    with header_col1:
+        st.markdown("### **User Input**")
+    
+    with header_col2:
+        icon_cols = st.columns(4)
+        with icon_cols[0]:
+            if st.button("📊", key="eq_bond_btn", help="Equities/Bonds Ratio"):
+                st.session_state.active_input = "Equities/Bonds Ratio"
+        with icon_cols[1]:
+            if st.button("🏠", key="home_bias_btn", help="Home Bias Equities"):
+                st.session_state.active_input = "Home Bias Equities"
+        with icon_cols[2]:
+            if st.button("📈", key="yield_btn", help="Yield Curve CHF"):
+                st.session_state.active_input = "Yield Curve CHF"
+        with icon_cols[3]:
+            if st.button("🛡️", key="fx_btn", help="FX Hedging"):
+                st.session_state.active_input = "FX Hedging"
+    
+    st.divider()
+    
+    # Display active input slider
+    if st.session_state.active_input == "Equities/Bonds Ratio":
+        eq_bond = st.slider(
+            "Equities / Bonds Ratio",
+            0.0,
+            1.0,
+            0.70,
+            0.01,
+            help=input_descriptions["Equities/Bonds Ratio"]
+        )
+        home_bias = 0.60
+        yield_curve = 0.10
+        fx_hedge = 0.00
+    elif st.session_state.active_input == "Home Bias Equities":
+        home_bias = st.slider(
+            "Home Bias Equities",
+            0.0,
+            1.0,
+            0.60,
+            0.01,
+            help=input_descriptions["Home Bias Equities"]
+        )
+        eq_bond = 0.70
+        yield_curve = 0.10
+        fx_hedge = 0.00
+    elif st.session_state.active_input == "Yield Curve CHF":
+        yield_curve = st.slider(
+            "Yield Curve CHF",
+            0.0,
+            1.0,
+            0.10,
+            0.01,
+            help=input_descriptions["Yield Curve CHF"]
+        )
+        eq_bond = 0.70
+        home_bias = 0.60
+        fx_hedge = 0.00
+    else:  # FX Hedging
+        fx_hedge = st.slider(
+            "FX Hedging",
+            0.0,
+            1.0,
+            0.00,
+            0.01,
+            help=input_descriptions["FX Hedging"]
+        )
+        eq_bond = 0.70
+        home_bias = 0.60
+        yield_curve = 0.10
 
     user_weights = calculate_user_weights(
         eq_bond,
@@ -234,6 +280,8 @@ with left:
     )
 
 with right:
+    st.markdown("### **Portfolio Performance**")
+    st.divider()
 
     reference_index = calculate_portfolio_index(
         df,
@@ -268,11 +316,12 @@ with right:
     )
 
     fig.update_layout(
-        title="Portfolio Performance",
         height=650,
         xaxis_title="Date",
         yaxis_title="Index Value",
-        hovermode="x unified"
+        hovermode="x unified",
+        showlegend=True,
+        margin=dict(l=0, r=0, t=0, b=0)
     )
 
     st.plotly_chart(
