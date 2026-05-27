@@ -6,6 +6,100 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Swiss Pension Funds - Portfolio Analysis", layout="wide")
 
+# Custom CSS for responsive design
+st.markdown("""
+    <style>
+    /* Main title styling */
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        font-weight: 600;
+    }
+    
+    /* Section headers */
+    h2 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Cockpit container */
+    .cockpit-container {
+        background-color: #f0f2f6;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    /* Icon buttons styling */
+    .icon-button {
+        display: inline-block;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin: 0 4px;
+        border-radius: 8px;
+        border: none;
+        background-color: #e8eef2;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: background-color 0.2s;
+    }
+    
+    .icon-button.active {
+        background-color: #0052CC;
+        color: white;
+    }
+    
+    .icon-button:hover {
+        background-color: #d0d8e0;
+    }
+    
+    .icon-button.active:hover {
+        background-color: #0052CC;
+    }
+    
+    /* Slider styling */
+    .slider-container {
+        background-color: #e8f0f8;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    /* Performance chart container */
+    .performance-container {
+        background-color: #faf8f3;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+    
+    @media (max-width: 900px) {
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .cockpit-container {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .slider-container {
+            padding: 1rem;
+            margin-top: 0.8rem;
+        }
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 @st.cache_data
 def load_data():
     file_path = "20260512_Portfolio Lens_v3.xlsx"
@@ -198,6 +292,7 @@ if "yield_curve_value" not in st.session_state:
 if "fx_hedge_value" not in st.session_state:
     st.session_state.fx_hedge_value = 0.80
 
+# Main title
 st.title("Swiss Pension Funds - Portfolio Analysis")
 
 # Define input descriptions
@@ -208,117 +303,120 @@ input_descriptions = {
     "FX Hedging": "Swiss pension funds hedge approximately 80% of their foreign currency exposure. A ratio of 100% indicates that all foreign currency risk is fully hedged."
 }
 
-left, right = st.columns([1, 3])
+# Portfolio Cockpit section
+st.markdown("## Portfolio Cockpit")
 
-with left:
-    # User Input header with horizontal icons
-    header_col1, header_col2 = st.columns([1, 1.5])
+# Icon selector row
+col_icons = st.columns([0.3, 0.7], gap="small")
+with col_icons[1]:
+    icon_cols = st.columns(4, gap="small")
     
-    with header_col1:
-        st.markdown("#### **Portfolio Cockpit**")
+    icons = [
+        ("⚖️", "Equities/Bonds Ratio"),
+        ("🏠", "Home Bias Equities"),
+        ("📈", "Yield Curve CHF"),
+        ("🛡️", "FX Hedging")
+    ]
     
-    with header_col2:
-        icon_cols = st.columns(4, gap="small")
-        
-        with icon_cols[0]:
-            if st.button("⚖️", key="eq_bond_btn", help="Equities/Bonds Ratio"):
-                st.session_state.active_input = "Equities/Bonds Ratio"
+    for i, (icon, label) in enumerate(icons):
+        with icon_cols[i]:
+            is_active = st.session_state.active_input == label
+            button_style = "active" if is_active else ""
+            if st.button(icon, key=f"icon_{i}", help=label, use_container_width=True):
+                st.session_state.active_input = label
                 st.rerun()
-            # Highlight if active
-            if st.session_state.active_input == "Equities/Bonds Ratio":
-                st.markdown(
-                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
-                    unsafe_allow_html=True
-                )
-        
-        with icon_cols[1]:
-            if st.button("🏠", key="home_bias_btn", help="Home Bias Equities"):
-                st.session_state.active_input = "Home Bias Equities"
-                st.rerun()
-            if st.session_state.active_input == "Home Bias Equities":
-                st.markdown(
-                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
-                    unsafe_allow_html=True
-                )
-        
-        with icon_cols[2]:
-            if st.button("📈", key="yield_btn", help="Yield Curve CHF"):
-                st.session_state.active_input = "Yield Curve CHF"
-                st.rerun()
-            if st.session_state.active_input == "Yield Curve CHF":
-                st.markdown(
-                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
-                    unsafe_allow_html=True
-                )
-        
-        with icon_cols[3]:
-            if st.button("🛡️", key="fx_btn", help="FX Hedging"):
-                st.session_state.active_input = "FX Hedging"
-                st.rerun()
-            if st.session_state.active_input == "FX Hedging":
-                st.markdown(
-                    '<div style="position: relative; top: -50px; left: 0px; width: 40px; height: 40px; background-color: #0052CC; border-radius: 8px; z-index: -1;"></div>',
-                    unsafe_allow_html=True
-                )
+
+# Slider container
+with st.container():
+    st.markdown('<div class="slider-container">', unsafe_allow_html=True)
     
-    st.divider()
-    
-    # Display active input slider
     if st.session_state.active_input == "Equities/Bonds Ratio":
-        st.session_state.eq_bond_value = st.slider(
-            "Equities / Bonds Ratio",
-            0.0,
-            1.0,
-            st.session_state.eq_bond_value,
-            0.01,
-            help=input_descriptions["Equities/Bonds Ratio"],
-            label_visibility="visible"
-        )
+        label = "Equities/Bonds Ratio"
+        col1, col2, col3 = st.columns([1.5, 3, 0.5])
+        with col1:
+            st.write(label)
+        with col2:
+            st.session_state.eq_bond_value = st.slider(
+                label,
+                0.0,
+                1.0,
+                st.session_state.eq_bond_value,
+                0.01,
+                help=input_descriptions[label],
+                label_visibility="collapsed"
+            )
+        with col3:
+            st.write(f"{st.session_state.eq_bond_value*100:.0f}%")
         
     elif st.session_state.active_input == "Home Bias Equities":
-        st.session_state.home_bias_value = st.slider(
-            "Home Bias Equities",
-            0.0,
-            1.0,
-            st.session_state.home_bias_value,
-            0.01,
-            help=input_descriptions["Home Bias Equities"],
-            label_visibility="visible"
-        )
+        label = "Home Bias Equities"
+        col1, col2, col3 = st.columns([1.5, 3, 0.5])
+        with col1:
+            st.write(label)
+        with col2:
+            st.session_state.home_bias_value = st.slider(
+                label,
+                0.0,
+                1.0,
+                st.session_state.home_bias_value,
+                0.01,
+                help=input_descriptions[label],
+                label_visibility="collapsed"
+            )
+        with col3:
+            st.write(f"{st.session_state.home_bias_value*100:.0f}%")
         
     elif st.session_state.active_input == "Yield Curve CHF":
-        st.session_state.yield_curve_value = st.slider(
-            "Yield Curve CHF",
-            0.0,
-            1.0,
-            st.session_state.yield_curve_value,
-            0.01,
-            help=input_descriptions["Yield Curve CHF"],
-            label_visibility="visible"
-        )
+        label = "Yield Curve CHF"
+        col1, col2, col3 = st.columns([1.5, 3, 0.5])
+        with col1:
+            st.write(label)
+        with col2:
+            st.session_state.yield_curve_value = st.slider(
+                label,
+                0.0,
+                1.0,
+                st.session_state.yield_curve_value,
+                0.01,
+                help=input_descriptions[label],
+                label_visibility="collapsed"
+            )
+        with col3:
+            st.write(f"{st.session_state.yield_curve_value*100:.0f}%")
         
     else:  # FX Hedging
-        st.session_state.fx_hedge_value = st.slider(
-            "FX Hedging",
-            0.0,
-            1.0,
-            st.session_state.fx_hedge_value,
-            0.01,
-            help=input_descriptions["FX Hedging"],
-            label_visibility="visible"
-        )
+        label = "FX Hedging"
+        col1, col2, col3 = st.columns([1.5, 3, 0.5])
+        with col1:
+            st.write(label)
+        with col2:
+            st.session_state.fx_hedge_value = st.slider(
+                label,
+                0.0,
+                1.0,
+                st.session_state.fx_hedge_value,
+                0.01,
+                help=input_descriptions[label],
+                label_visibility="collapsed"
+            )
+        with col3:
+            st.write(f"{st.session_state.fx_hedge_value*100:.0f}%")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    user_weights = calculate_user_weights(
-        st.session_state.eq_bond_value,
-        st.session_state.home_bias_value,
-        st.session_state.yield_curve_value,
-        st.session_state.fx_hedge_value
-    )
+user_weights = calculate_user_weights(
+    st.session_state.eq_bond_value,
+    st.session_state.home_bias_value,
+    st.session_state.yield_curve_value,
+    st.session_state.fx_hedge_value
+)
 
-with right:
-    st.markdown("#### **Portfolio Performance**")
-    st.divider()
+# Performance section
+st.markdown("## Performance")
 
+with st.container():
+    st.markdown('<div class="performance-container">', unsafe_allow_html=True)
+    
     reference_index = calculate_portfolio_index(
         df,
         reference_weights,
@@ -338,7 +436,8 @@ with right:
             x=df["Date"],
             y=reference_index,
             mode="lines",
-            name="Reference Portfolio"
+            name="Reference Portfolio",
+            line=dict(color="#e0e0e0", width=2)
         )
     )
 
@@ -347,20 +446,34 @@ with right:
             x=df["Date"],
             y=user_index,
             mode="lines",
-            name="User Portfolio"
+            name="User Portfolio",
+            line=dict(color="#0052CC", width=2)
         )
     )
 
     fig.update_layout(
-        height=650,
-        xaxis_title="Date",
-        yaxis_title="Index Value",
+        height=450,
+        xaxis_title=None,
+        yaxis_title=None,
         hovermode="x unified",
         showlegend=True,
-        margin=dict(l=0, r=0, t=0, b=0)
+        margin=dict(l=40, r=20, t=20, b=40),
+        paper_bgcolor="#faf8f3",
+        plot_bgcolor="#faf8f3",
+        font=dict(size=12),
+        legend=dict(
+            x=0.5,
+            y=-0.15,
+            xanchor="center",
+            yanchor="top",
+            orientation="h"
+        )
     )
 
     st.plotly_chart(
         fig,
-        use_container_width=True
+        use_container_width=True,
+        config={"displayModeBar": False}
     )
+    
+    st.markdown('</div>', unsafe_allow_html=True)
