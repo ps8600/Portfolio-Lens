@@ -233,17 +233,6 @@ with left:
         fx_hedge
     )
 
-    st.subheader("User Portfolio Weights")
-
-    weights_df = pd.DataFrame({
-        "Weight": pd.Series(user_weights)
-    })
-
-    st.dataframe(
-        (weights_df * 100).round(2),
-        use_container_width=True
-    )
-
 with right:
 
     reference_index = calculate_portfolio_index(
@@ -288,27 +277,5 @@ with right:
 
     st.plotly_chart(
         fig,
-        use_container_width=True
-    )
-
-    metrics = pd.DataFrame({
-        "Metric": [
-            "Total Return",
-            "Volatility"
-        ],
-        "Reference": [
-            f"{(reference_index.iloc[-1] / 100 - 1) * 100:.2f}%",
-            f"{df[asset_cols].pct_change().mean(axis=1).std() * np.sqrt(252) * 100:.2f}%"
-        ],
-        "User": [
-            f"{(user_index.iloc[-1] / 100 - 1) * 100:.2f}%",
-            f"{df[asset_cols].pct_change().mul(pd.Series(user_weights), axis=1).sum(axis=1).std() * np.sqrt(252) * 100:.2f}%"
-        ]
-    })
-
-    st.subheader("Performance Metrics")
-
-    st.dataframe(
-        metrics,
         use_container_width=True
     )
