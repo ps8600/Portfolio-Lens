@@ -10,12 +10,16 @@ st.set_page_config(
     menu_items=None
 )
 
-# Hide Streamlit styling code
+# Hide Streamlit styling code and reduce top margin
 hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
+.block-container {
+    padding-top: 1rem !important;
+    padding-bottom: 0rem !important;
+}
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
@@ -225,90 +229,65 @@ st.title("Portfolio Architecture")
 # Strategic Exposure section
 st.markdown("## Strategic Exposure")
 
-# Compact slider layout
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("**Equities/Bonds Ratio**")
-    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
-    with col_min:
-        st.write("0%")
-    with col_slider:
+    with st.expander("⚖️ Equities/Bonds Ratio", expanded=True):
         st.session_state.eq_bond_value = st.slider(
             "Equities/Bonds Ratio",
             0.0,
             1.0,
             st.session_state.eq_bond_value,
             0.01,
-            label_visibility="collapsed",
-            format="%.0f%%"
+            label_visibility="collapsed"
         )
-    with col_val:
-        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.eq_bond_value*100:.0f}%</div>", unsafe_allow_html=True)
-    with col_max:
-        st.write("100%")
-    st.caption("½ = 50%")
+        col_val, col_pct = st.columns([1, 0.5])
+        with col_pct:
+            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.eq_bond_value*100:.0f}%</div>', unsafe_allow_html=True)
+        st.caption("Reference: ½ = 50%")
     
-    st.markdown("**Yield Curve CHF**")
-    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
-    with col_min:
-        st.write("0%")
-    with col_slider:
+    with st.expander("📈 Yield Curve CHF"):
         st.session_state.yield_curve_value = st.slider(
             "Yield Curve CHF",
             0.0,
             1.0,
             st.session_state.yield_curve_value,
             0.01,
-            label_visibility="collapsed",
-            format="%.0f%%"
+            label_visibility="collapsed"
         )
-    with col_val:
-        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.yield_curve_value*100:.0f}%</div>", unsafe_allow_html=True)
-    with col_max:
-        st.write("100%")
-    st.caption("¾ = 75%")
+        col_val, col_pct = st.columns([1, 0.5])
+        with col_pct:
+            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.yield_curve_value*100:.0f}%</div>', unsafe_allow_html=True)
+        st.caption("Reference: ¾ = 75%")
 
 with col2:
-    st.markdown("**Home Bias Equities**")
-    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
-    with col_min:
-        st.write("0%")
-    with col_slider:
+    with st.expander("🏠 Home Bias Equities"):
         st.session_state.home_bias_value = st.slider(
             "Home Bias Equities",
             0.0,
             1.0,
             st.session_state.home_bias_value,
             0.01,
-            label_visibility="collapsed",
-            format="%.0f%%"
+            label_visibility="collapsed"
         )
-    with col_val:
-        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.home_bias_value*100:.0f}%</div>", unsafe_allow_html=True)
-    with col_max:
-        st.write("100%")
-    st.caption("⅓ = 33%")
+        col_val, col_pct = st.columns([1, 0.5])
+        with col_pct:
+            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.home_bias_value*100:.0f}%</div>', unsafe_allow_html=True)
+        st.caption("Reference: ⅓ = 33%")
     
-    st.markdown("**FX Hedging**")
-    col_min, col_slider, col_val, col_max = st.columns([0.1, 4, 0.3, 0.1])
-    with col_min:
-        st.write("0%")
-    with col_slider:
+    with st.expander("🛡️ FX Hedging"):
         st.session_state.fx_hedge_value = st.slider(
             "FX Hedging",
             0.0,
             1.0,
             st.session_state.fx_hedge_value,
             0.01,
-            label_visibility="collapsed",
-            format="%.0f%%"
+            label_visibility="collapsed"
         )
-    with col_val:
-        st.markdown(f"<div style='text-align: right; color: #00FF00; font-weight: bold;'>{st.session_state.fx_hedge_value*100:.0f}%</div>", unsafe_allow_html=True)
-    with col_max:
-        st.write("100%")
-    st.caption("⅘ = 80%")
+        col_val, col_pct = st.columns([1, 0.5])
+        with col_pct:
+            st.markdown(f'<div style="text-align: right; color: #00FF00; font-weight: bold;">{st.session_state.fx_hedge_value*100:.0f}%</div>', unsafe_allow_html=True)
+        st.caption("Reference: ⅘ = 80%")
 
 # Reset to reference button
 col_button1, col_button2, col_button3 = st.columns([1, 4, 1])
